@@ -16,7 +16,8 @@ import {
   ChevronLeft,
   Wrench,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Zap
 } from 'lucide-react';
 
 // --- Types ---
@@ -243,6 +244,7 @@ const PistonAnimation = ({ strokeIndex, isPlaying }: { strokeIndex: number; isPl
 export default function App() {
   const [currentStroke, setCurrentStroke] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isFastMode, setIsFastMode] = useState(false);
   const [activeTab, setActiveTab] = useState<'home' | 'simulation' | 'components' | 'diagnostics' | 'quiz'>('home');
   const [selectedDiag, setSelectedDiag] = useState<number | null>(null);
   const [selectedComponent, setSelectedComponent] = useState<number | null>(null);
@@ -365,10 +367,10 @@ export default function App() {
     if (isPlaying) {
       interval = setInterval(() => {
         setCurrentStroke((prev) => (prev + 1) % 4);
-      }, 1500);
+      }, isFastMode ? 800 : 1500);
     }
     return () => clearInterval(interval);
-  }, [isPlaying]);
+  }, [isPlaying, isFastMode]);
 
   const nextStroke = () => setCurrentStroke((prev) => (prev + 1) % 4);
   const prevStroke = () => setCurrentStroke((prev) => (prev - 1 + 4) % 4);
@@ -485,30 +487,43 @@ export default function App() {
             <div className="flex flex-col items-center">
               <PistonAnimation strokeIndex={currentStroke} isPlaying={isPlaying} />
               
-              <div className="mt-8 flex items-center gap-4">
+              <div className="mt-8 flex flex-col items-center gap-6">
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={prevStroke}
+                    className="p-3 bg-zinc-800 hover:bg-zinc-700 rounded-full border border-zinc-700 transition-colors"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button 
+                    onClick={() => { setIsPlaying(!isPlaying); if (!isPlaying) setIsFastMode(false); }}
+                    className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${isPlaying && !isFastMode ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20' : 'bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20'}`}
+                  >
+                    {isPlaying && !isFastMode ? <Pause className="text-zinc-950 fill-current" /> : <Play className="text-zinc-950 fill-current ml-1" />}
+                  </button>
+                  <button 
+                    onClick={nextStroke}
+                    className="p-3 bg-zinc-800 hover:bg-zinc-700 rounded-full border border-zinc-700 transition-colors"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                  <button 
+                    onClick={() => { setIsPlaying(false); setIsFastMode(false); setCurrentStroke(0); }}
+                    className="p-3 bg-zinc-800 hover:bg-zinc-700 rounded-full border border-zinc-700 transition-colors"
+                  >
+                    <RotateCcw className="w-6 h-6" />
+                  </button>
+                </div>
+
                 <button 
-                  onClick={prevStroke}
-                  className="p-3 bg-zinc-800 hover:bg-zinc-700 rounded-full border border-zinc-700 transition-colors"
+                  onClick={() => {
+                    setIsFastMode(!isFastMode);
+                    setIsPlaying(true);
+                  }}
+                  className={`px-6 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 border-2 ${isFastMode ? 'bg-orange-500 border-orange-400 text-zinc-950 shadow-lg shadow-orange-500/20' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-orange-500/50 hover:text-orange-500'}`}
                 >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button 
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${isPlaying ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20' : 'bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20'}`}
-                >
-                  {isPlaying ? <Pause className="text-zinc-950 fill-current" /> : <Play className="text-zinc-950 fill-current ml-1" />}
-                </button>
-                <button 
-                  onClick={nextStroke}
-                  className="p-3 bg-zinc-800 hover:bg-zinc-700 rounded-full border border-zinc-700 transition-colors"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-                <button 
-                  onClick={() => { setIsPlaying(false); setCurrentStroke(0); }}
-                  className="p-3 bg-zinc-800 hover:bg-zinc-700 rounded-full border border-zinc-700 transition-colors"
-                >
-                  <RotateCcw className="w-6 h-6" />
+                  <Zap className={`w-5 h-5 ${isFastMode ? 'fill-current' : ''}`} />
+                  {isFastMode ? 'Mode Kerja Utuh Aktif' : 'Simulasi Kerja Utuh (Siklus Cepat)'}
                 </button>
               </div>
             </div>
