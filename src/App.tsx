@@ -25,6 +25,7 @@ type Stroke = 'Hisap' | 'Kompresi' | 'Usaha' | 'Buang';
 
 interface ComponentInfo {
   name: string;
+  englishName: string;
   function: string;
   description: string;
 }
@@ -62,30 +63,59 @@ const STROKES: { name: Stroke; description: string; color: string }[] = [
 ];
 
 const COMPONENTS: ComponentInfo[] = [
-  { 
-    name: 'Piston', 
-    function: 'Mengubah energi ekspansi menjadi energi mekanik.',
-    description: 'Bergerak naik turun di dalam silinder untuk melakukan siklus kerja.'
+  {
+    name: 'Kepala Silinder',
+    englishName: 'Cylinder Head',
+    function: 'Menutup bagian atas silinder dan sebagai tempat mekanisme katup serta busi.',
+    description: 'Komponen ini menahan tekanan pembakaran dan mendinginkan panas di area ruang bakar.'
   },
-  { 
-    name: 'Poros Engkol (Crankshaft)', 
-    function: 'Mengubah gerak naik-turun piston menjadi gerak putar.',
-    description: 'Komponen utama yang meneruskan tenaga ke transmisi.'
+  {
+    name: 'Blok Silinder',
+    englishName: 'Cylinder Block',
+    function: 'Tempat piston bergerak naik turun dan sebagai rangka utama mesin.',
+    description: 'Terbuat dari besi tuang atau aluminium, memiliki saluran pendingin (water jacket).'
   },
-  { 
-    name: 'Katup (Valves)', 
-    function: 'Mengatur masuknya campuran bahan bakar dan keluarnya gas buang.',
-    description: 'Terdiri dari katup masuk (intake) dan katup buang (exhaust).'
+  {
+    name: 'Poros Engkol',
+    englishName: 'Crankshaft',
+    function: 'Mengubah gerak translasi (naik-turun) piston menjadi gerak rotasi (putar).',
+    description: 'Tenaga putar ini kemudian diteruskan ke sistem pemindah tenaga (transmisi).'
   },
-  { 
-    name: 'Busi (Spark Plug)', 
-    function: 'Memercikkan bunga api untuk memulai pembakaran.',
-    description: 'Hanya bekerja pada akhir langkah kompresi.'
+  {
+    name: 'Piston',
+    englishName: 'Piston',
+    function: 'Menerima tekanan hasil pembakaran dan meneruskannya ke poros engkol.',
+    description: 'Bergerak bolak-balik di dalam silinder untuk melakukan siklus kerja.'
   },
-  { 
-    name: 'Batang Piston (Connecting Rod)', 
+  {
+    name: 'Batang Piston',
+    englishName: 'Connecting Rod',
     function: 'Menghubungkan piston dengan poros engkol.',
-    description: 'Meneruskan gaya dari piston ke poros engkol.'
+    description: 'Meneruskan gaya tekan dari piston ke poros engkol untuk diubah menjadi putaran.'
+  },
+  {
+    name: 'Ring Piston',
+    englishName: 'Piston Rings',
+    function: 'Mencegah kebocoran kompresi dan menyapu oli pada dinding silinder.',
+    description: 'Terdiri dari ring kompresi dan ring oli untuk menjaga pelumasan dan tekanan.'
+  },
+  {
+    name: 'Poros Nok',
+    englishName: 'Camshaft',
+    function: 'Mengatur waktu pembukaan dan penutupan katup masuk dan buang.',
+    description: 'Digerakkan oleh poros engkol melalui timing belt atau timing chain.'
+  },
+  {
+    name: 'Katup',
+    englishName: 'Valves',
+    function: 'Mengatur aliran gas masuk (intake) dan gas buang (exhaust).',
+    description: 'Katup masuk memasukkan campuran udara-bensin, katup buang mengeluarkan sisa pembakaran.'
+  },
+  {
+    name: 'Busi',
+    englishName: 'Spark Plug',
+    function: 'Memercikkan bunga api untuk membakar campuran udara dan bahan bakar.',
+    description: 'Bekerja pada akhir langkah kompresi untuk memulai langkah usaha.'
   }
 ];
 
@@ -213,8 +243,9 @@ const PistonAnimation = ({ strokeIndex, isPlaying }: { strokeIndex: number; isPl
 export default function App() {
   const [currentStroke, setCurrentStroke] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [activeTab, setActiveTab] = useState<'simulation' | 'components' | 'diagnostics' | 'quiz'>('simulation');
+  const [activeTab, setActiveTab] = useState<'home' | 'simulation' | 'components' | 'diagnostics' | 'quiz'>('home');
   const [selectedDiag, setSelectedDiag] = useState<number | null>(null);
+  const [selectedComponent, setSelectedComponent] = useState<number | null>(null);
 
   // Quiz State
   const [quizStep, setQuizStep] = useState<'intro' | 'questions' | 'registration' | 'result'>('intro');
@@ -347,8 +378,11 @@ export default function App() {
       {/* Header */}
       <header className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <div 
+            onClick={() => setActiveTab('home')}
+            className="flex items-center gap-3 cursor-pointer group"
+          >
+            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
               <Settings className="text-zinc-950 w-6 h-6" />
             </div>
             <div>
@@ -358,6 +392,12 @@ export default function App() {
           </div>
           
           <nav className="hidden md:flex items-center gap-1 bg-zinc-800/50 p-1 rounded-xl border border-zinc-700">
+            <button 
+              onClick={() => setActiveTab('home')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'home' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
+            >
+              Beranda
+            </button>
             <button 
               onClick={() => setActiveTab('simulation')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'simulation' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
@@ -387,6 +427,58 @@ export default function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-12">
+        {activeTab === 'home' && (
+          <div className="space-y-20">
+            {/* Hero Section */}
+            <div className="relative py-20 overflow-hidden">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-10 pointer-events-none">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-emerald-500/30 rounded-full blur-[120px]" />
+              </div>
+
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center space-y-8 relative z-10"
+              >
+                <div className="inline-block px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-500 text-xs font-mono font-bold uppercase tracking-widest mb-4">
+                  Interactive Automotive Learning
+                </div>
+                <h1 className="text-6xl md:text-8xl font-black tracking-tighter italic font-serif leading-none">
+                  Kuasai Teknologi <br />
+                  <span className="text-emerald-500">Mesin 4 Tak</span>
+                </h1>
+                <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+                  Platform simulasi interaktif untuk mempelajari prinsip kerja, anatomi komponen, dan diagnosis teknis mesin kendaraan modern.
+                </p>
+                <div className="flex flex-wrap justify-center gap-4 pt-8">
+                  <button 
+                    onClick={() => setActiveTab('simulation')}
+                    className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-bold rounded-2xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2"
+                  >
+                    Mulai Belajar Sekarang <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Stats/Features */}
+            <div className="grid md:grid-cols-3 gap-8 py-20 border-y border-zinc-900">
+              <div className="text-center space-y-2">
+                <p className="text-4xl font-bold text-white">100%</p>
+                <p className="text-sm text-zinc-500 uppercase tracking-widest font-mono">Interaktif</p>
+              </div>
+              <div className="text-center space-y-2">
+                <p className="text-4xl font-bold text-white">9+</p>
+                <p className="text-sm text-zinc-500 uppercase tracking-widest font-mono">Komponen Utama</p>
+              </div>
+              <div className="text-center space-y-2">
+                <p className="text-4xl font-bold text-white">4</p>
+                <p className="text-sm text-zinc-500 uppercase tracking-widest font-mono">Siklus Kerja</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'simulation' && (
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Animation */}
@@ -458,41 +550,107 @@ export default function App() {
                   Mesin 4 tak memerlukan 2 putaran poros engkol (720°) untuk menyelesaikan satu siklus pembakaran penuh.
                 </p>
               </div>
+
+              <div className="pt-8 border-t border-zinc-900">
+                <button 
+                  onClick={() => setActiveTab('home')}
+                  className="flex items-center gap-2 text-zinc-500 hover:text-emerald-500 transition-colors text-sm font-bold"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Kembali ke Beranda
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {activeTab === 'components' && (
-          <div className="space-y-12">
-            <div className="text-center max-w-2xl mx-auto space-y-4">
-              <h2 className="text-4xl font-bold tracking-tight">Anatomi Mesin</h2>
-              <p className="text-zinc-400">Pelajari bagian-bagian vital yang membuat mesin 4 tak bekerja dengan presisi tinggi.</p>
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1 space-y-6">
+              <div className="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                <div className="flex items-center gap-3 mb-6">
+                  <Settings className="text-emerald-500 w-6 h-6" />
+                  <h2 className="text-xl font-bold">Daftar Komponen</h2>
+                </div>
+                <p className="text-sm text-zinc-400 mb-8">Klik nama komponen untuk melihat fungsi dan keterangannya.</p>
+                
+                <div className="space-y-3">
+                  {COMPONENTS.map((comp, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedComponent(i)}
+                      className={`w-full p-4 rounded-xl border text-left transition-all ${selectedComponent === i ? 'bg-zinc-800 border-emerald-500/50' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}
+                    >
+                      <p className="text-sm font-bold">{comp.name}</p>
+                      <p className="text-[10px] font-mono text-zinc-500 italic uppercase">{comp.englishName}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {COMPONENTS.map((comp, i) => (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  key={comp.name}
-                  className="p-8 bg-zinc-900/50 rounded-3xl border border-zinc-800 hover:border-emerald-500/30 transition-all group"
-                >
-                  <div className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Settings className="text-emerald-500 w-6 h-6" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-3">{comp.name}</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs font-mono text-emerald-500 uppercase tracking-wider mb-1">Fungsi Utama</p>
-                      <p className="text-sm text-zinc-300 leading-relaxed">{comp.function}</p>
+            <div className="lg:col-span-2">
+              <AnimatePresence mode="wait">
+                {selectedComponent !== null ? (
+                  <motion.div 
+                    key={selectedComponent}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="h-full p-10 bg-zinc-900/50 rounded-3xl border border-zinc-800 flex flex-col"
+                  >
+                    <div className="mb-10">
+                      <h3 className="text-xs font-mono text-emerald-500 uppercase tracking-widest mb-2">Informasi Komponen</h3>
+                      <h2 className="text-4xl font-bold italic font-serif leading-tight">{COMPONENTS[selectedComponent].name}</h2>
+                      <p className="text-lg text-zinc-500 italic font-mono">({COMPONENTS[selectedComponent].englishName})</p>
                     </div>
-                    <div className="pt-4 border-t border-zinc-800">
-                      <p className="text-sm text-zinc-500 italic">{comp.description}</p>
+
+                    <div className="space-y-8 flex-grow">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-emerald-400">
+                          <Info className="w-5 h-5" />
+                          <h4 className="font-bold uppercase tracking-wider text-sm">Fungsi Utama</h4>
+                        </div>
+                        <div className="p-6 bg-emerald-500/5 rounded-2xl border border-emerald-500/20">
+                          <p className="text-xl text-zinc-200 leading-relaxed">{COMPONENTS[selectedComponent].function}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-zinc-400">
+                          <Settings className="w-5 h-5" />
+                          <h4 className="font-bold uppercase tracking-wider text-sm">Keterangan Tambahan</h4>
+                        </div>
+                        <div className="p-6 bg-zinc-800/30 rounded-2xl border border-zinc-800">
+                          <p className="text-zinc-400 leading-relaxed">{COMPONENTS[selectedComponent].description}</p>
+                        </div>
+                      </div>
                     </div>
+
+                    <div className="mt-10 pt-10 border-t border-zinc-800 flex justify-end">
+                      <button 
+                        onClick={() => setSelectedComponent(null)}
+                        className="text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-colors"
+                      >
+                        Tutup Detail
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center p-12 bg-zinc-900/20 rounded-3xl border-2 border-dashed border-zinc-800 text-zinc-500">
+                    <Settings className="w-16 h-16 mb-4 opacity-20" />
+                    <p className="text-lg font-medium">Pilih komponen di sebelah kiri untuk melihat detail</p>
                   </div>
-                </motion.div>
-              ))}
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="lg:col-span-3 pt-12 border-t border-zinc-900">
+              <button 
+                onClick={() => setActiveTab('home')}
+                className="flex items-center gap-2 text-zinc-500 hover:text-emerald-500 transition-colors text-sm font-bold"
+              >
+                <ChevronLeft className="w-4 h-4" /> Kembali ke Beranda
+              </button>
             </div>
           </div>
         )}
@@ -587,6 +745,15 @@ export default function App() {
                   </div>
                 )}
               </AnimatePresence>
+            </div>
+
+            <div className="lg:col-span-3 pt-12 border-t border-zinc-900">
+              <button 
+                onClick={() => setActiveTab('home')}
+                className="flex items-center gap-2 text-zinc-500 hover:text-emerald-500 transition-colors text-sm font-bold"
+              >
+                <ChevronLeft className="w-4 h-4" /> Kembali ke Beranda
+              </button>
             </div>
           </div>
         )}
@@ -754,6 +921,15 @@ export default function App() {
                     Ulangi Kuis
                   </button>
                 </div>
+
+                <div className="pt-8 border-t border-zinc-800">
+                  <button 
+                    onClick={() => { resetQuiz(); setActiveTab('home'); }}
+                    className="flex items-center gap-2 text-zinc-500 hover:text-emerald-500 transition-colors text-sm font-bold mx-auto"
+                  >
+                    <ChevronLeft className="w-4 h-4" /> Kembali ke Beranda
+                  </button>
+                </div>
               </motion.div>
             )}
           </div>
@@ -764,8 +940,7 @@ export default function App() {
       <footer className="border-t border-zinc-900 py-12 mt-12 bg-zinc-950">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-3 opacity-50">
-            <Settings className="w-5 h-5" />
-            <span className="text-sm font-mono tracking-tighter">ENGINE_DYNAMICS_LAB_2024</span>
+            {/* Brand identifier removed */}
           </div>
           <div className="flex gap-8 text-xs font-mono text-zinc-600 uppercase tracking-widest">
             <span>Intake</span>
@@ -773,7 +948,7 @@ export default function App() {
             <span>Power</span>
             <span>Exhaust</span>
           </div>
-          <p className="text-xs text-zinc-600">© 2024 Automotive Learning Systems</p>
+          <p className="text-xs text-zinc-600">© 2026 KALIMMUSTOFA AUTOMOTIVE EDUCATION</p>
         </div>
       </footer>
     </div>
